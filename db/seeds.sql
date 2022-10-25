@@ -25,4 +25,4 @@ VALUES
 ('Kunal', 'Singh', 'Account Manager', 'Finance', '160000', 'null'),
 ('Malia', 'Brown', 'Accountant', 'Finance', '125000', 'Kunal Singh'),
 ('Sarah', 'Lourd', 'Legal Team Lead', 'Legal', '250000', 'null'),
-('Tom', 'Allen', 'Lawyer', 'Legal', '190000', 'Sarah Lourd');*/
+('Tom', 'Allen', 'Lawyer', 'Legal', '190000', 'Sarah Lourd');
