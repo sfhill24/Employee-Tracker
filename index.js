@@ -123,6 +123,8 @@ const addRole = async () => {
 
     let deptID = dept.find(x => x.name == newRole.department);
     await db.query(`INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`, [newRole.title, newRole.salary, deptID.id]);
+
+    mainMenu();
 }
 
 //function to add an employee
@@ -132,6 +134,8 @@ const addEmployee = async () => {
 
     let [managers] = await db.query(`SELECT * FROM employees WHERE manager_id IS NULL`);
     let managerList = managers.map(x => x.first_name + " " + x.last_name)
+
+    managerList.unshift("None");
 
     let newEmployee = await inquirer.prompt([
         {
@@ -158,16 +162,57 @@ const addEmployee = async () => {
         },
     ]);
 
-    //let roleID = roles.find(x => x.title == newEmployee.role);
-    let managerFirstName = manager.first_name;
-    //let managerObj = managers.find(x => x.first_name == "");
+    let roleID = roles.find(x => x.title == newEmployee.role);
 
-    await db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id VALUES (?,?,?,?)`, [newEmployee.firstName, newEmployee.lastName, roleID.title, managerObj.manager_id]);
+    let managerName = newEmployee.manager.split(' ');
+    let managerFirstName = managerName[0];
+    let managerLastName = managerName[1];
+    let managerID = managers.find(x => x.first_name == managerFirstName && x.last_name == managerLastName);
+
+    let id = null;
+    if (managerID != undefined) {
+        id = managerID.id;
+    }
+
+    await db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`, [newEmployee.firstName, newEmployee.lastName, roleID.id, id]);
+
+    mainMenu();
 }
 
 //function to update employee
 const updateEmployeeRole = async () => {
+    let [roles] = await db.query(`SELECT * FROM roles`);
+    let roleList = roles.map(x => x.title)
 
+    let [employees] = await db.query(`SELECT * FROM employees`);
+    let employeeList = employees.map(x => x.first_name + " " + x.last_name);
+
+
+    let updatedRole = await inquirer.prompt([
+        {
+            name: "employee",
+            type: "list",
+            message: "Which employees'role do you want to update?",
+            choices: employeeList
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "Which role do you want to assign the selected employee?",
+            choices: roleList
+        },
+    ]);
+
+    let selectedRole = roles.find(x => x.title == updatedRole.role);
+   
+    let employeeName = updatedRole.employee.split(' ');
+    let employeeFirstName = employeeName[0];
+    let employeeLastName = employeeName[1];
+    let employeeID = employees.find(x => x.first_name == employeeFirstName && x.last_name == employeeLastName);
+
+    await db.query(`UPDATE employees SET role_id = ? WHERE first_name = ? AND last_name = ?`, [selectedRole.id, employeeFirstName, employeeLastName]);
+
+    mainMenu();
 }
 
 mainMenu();
